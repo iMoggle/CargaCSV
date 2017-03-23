@@ -8,7 +8,14 @@
  */
 class CargadorContabilidad
 {
-    private $_mensaje_error;
+    private $mensaje;
+
+    public function __get($propiedad)
+    {
+        if (property_exists($this, $propiedad)) {
+            return $this->$propiedad;
+        }
+    }
 
     private function generarMensaje($mensaje)
     {
@@ -16,15 +23,15 @@ class CargadorContabilidad
 
         switch ($codigo_error) {
             case 0:
-                $this->_mensaje_error = "La operacion fue realizada satisfactoriamente.";
+                $this->mensaje = "La operacion fue realizada satisfactoriamente.";
                 break;
 
             case 1:
-                $this->_mensaje_error = "Ya existe un archivo con ese nombre.";
+                $this->mensaje = "Ya existe un archivo con ese nombre.";
                 break;
 
             default:
-                $this->_mensaje_error = $mensaje[1];
+                $this->mensaje = $mensaje[1];
                 break;
         }
     }
@@ -41,16 +48,17 @@ class CargadorContabilidad
 
     private function cargarArchivo($archivo)
     {
+        $_str_cadena = "";
         //if there was an error uploading the file
         if ($archivo["file"]["error"] > 0) {
-            $this->generarMensaje(array(null, $_FILES["file"]["error"]));
+            $this->generarMensaje(array(-1, $_FILES["file"]["error"]));
             return false;
         } else {
             //Print file details
-            echo "Upload: " . $archivo["file"]["name"] . "<br />";
-            echo "Type: " . $archivo["file"]["type"] . "<br />";
-            echo "Size: " . ($archivo["file"]["size"] / 1024) . " Kb<br />";
-            echo "Temp file: " . $archivo["file"]["tmp_name"] . "<br />";
+            $_str_cadena = "Upload: " . $archivo["file"]["name"] . "<br />";
+            $_str_cadena .= "Type: " . $archivo["file"]["type"] . "<br />";
+            $_str_cadena .= "Size: " . ($archivo["file"]["size"] / 1024) . " Kb<br />";
+            $_str_cadena .= "Temp file: " . $archivo["file"]["tmp_name"] . "<br />";
 
             //if file already exists
             if (file_exists("upload/" . $archivo["file"]["name"])) {
@@ -58,10 +66,10 @@ class CargadorContabilidad
                 return false;
             } else {
                 //Store file in directory "upload" with the name of "uploaded_file.txt"
-                $storagename = "uploaded_" . date('y-m-d') . "_" . date('hi.s') . "txt";
+                $storagename = $_FILES["file"]["name"];
                 move_uploaded_file($archivo["file"]["tmp_name"], "uploads/" . $storagename);
-                echo "Stored in: " . "uploads/" . $_FILES["file"]["name"] . "<br />";
-                $this->generarMensaje(0);
+                $_str_cadena .= "Stored in: " . "uploads/" . $_FILES["file"]["name"] . "<br />";
+                $this->generarMensaje(array(-1, $_str_cadena));
                 return true;
             }
         }
@@ -70,7 +78,7 @@ class CargadorContabilidad
     public function procesarArchivo($archivo)
     {
         if ($this->cargarArchivo($archivo)) {
-            $extension = strtolower(pathinfo($archivo['File']['name'], PATHINFO_EXTENSION));
+            $extension = strtolower(pathinfo($archivo['file']['name'], PATHINFO_EXTENSION));
 
             switch ($extension) {
                 case "csv":
@@ -82,8 +90,9 @@ class CargadorContabilidad
                 default:
                     break;
             };
+            return true;
         } else {
-
+            return false;
         }
     }
 }

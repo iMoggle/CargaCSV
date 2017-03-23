@@ -1,6 +1,4 @@
 <?php
-if ( isset($_POST["submit"]) ) {
-
     if ( isset($_FILES["file"])) {
 
         //if there was an error uploading the file
@@ -20,7 +18,7 @@ if ( isset($_POST["submit"]) ) {
             }
             else {
                 //Store file in directory "upload" with the name of "uploaded_file.txt"
-                $storagename = "uploaded_".date('y-m-d')."_".date('hi.s')."txt";
+                $storagename = $_FILES["file"]["name"];
                 move_uploaded_file($_FILES["file"]["tmp_name"], "uploads/" . $storagename);
                 echo "Stored in: " . "uploads/" . $_FILES["file"]["name"] . "<br />";
             }
@@ -28,5 +26,4 @@ if ( isset($_POST["submit"]) ) {
     } else {
         echo "No file selected <br />";
     }
-}
 ?>

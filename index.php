@@ -1,5 +1,4 @@
 <?php
-
 ?>
 
 <html>
@@ -41,6 +40,80 @@
 
             </div>
         </div>
+        <div id="dv_resultadostable" class="table-responsive" style="display:none">
+            <table class="table table-bordered table-hover">
+                <thead class="thead-default">
+                <tr>
+                    <th>Numerica</th>
+                    <th>Fecha</th>
+                    <th>Cuenta</th>
+                    <th>Descripción</th>
+                    <th>Deposito</th>
+                    <th>Sucursal</th>
+                    <th>Numerica</th>
+                    <th>Matricula</th>
+                    <th>Sede</th>
+                    <th>Metodo de Pago</th>
+                    <th>Ultimos Digitos</th>
+                    <th>Autorización</th>
+                    <th>Depositos</th>
+                    <th>Cubre su pago</th>
+                    <th>Periodo</th>
+                    <th>Factura</th>
+                    <th>Nombre</th>
+                    <th>Monto Colegiatura</th>
+                    <th>Saldo</th>
+                    <th>Adeudo</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>data</td>
+                    <td>data</td>
+                    <td>data</td>
+                    <td>data</td>
+                    <td>$0.00</td>
+                    <td>data</td>
+                    <td>data</td>
+                    <td>data</td>
+                    <td>data</td>
+                    <td>data</td>
+                    <td>data</td>
+                    <td>data</td>
+                    <td>data</td>
+                    <td>data</td>
+                    <td>data</td>
+                    <td>data</td>
+                    <td>data</td>
+                    <td>$0.00</td>
+                    <td>$0.00</td>
+                    <td>$0.00</td>
+                </tr>
+                <tr>
+                    <td>data</td>
+                    <td>data</td>
+                    <td>data</td>
+                    <td>data</td>
+                    <td>$0.00</td>
+                    <td>data</td>
+                    <td>data</td>
+                    <td>data</td>
+                    <td>data</td>
+                    <td>data</td>
+                    <td>data</td>
+                    <td>data</td>
+                    <td>data</td>
+                    <td>data</td>
+                    <td>data</td>
+                    <td>data</td>
+                    <td>data</td>
+                    <td>$0.00</td>
+                    <td>$0.00</td>
+                    <td>$0.00</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
     </form>
 </div>
 
@@ -67,6 +140,7 @@
                 type: 'post',
                 success: function (data) {
                     $("#dv_resultado").html(data);
+                    $("#dv_resultadostable").show("slow");
                 }
             });
         })

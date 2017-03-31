@@ -9,6 +9,7 @@
  */
 
 require_once("db/functions_db_ms.php");
+require_once("Sede.php");
 
 class Alumno
 {

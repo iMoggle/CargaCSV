@@ -85,8 +85,12 @@ function num($query)
 
 function arreglo($query)
 {
-    $res = mysqli_fetch_array($query);
-    return $res;
+    if (mysqli_num_rows($query) > 0) {
+        $res = mysqli_fetch_array($query);
+        return $res;
+    } else {
+        return null;
+    }
 }
 
 function escape_cara($query)

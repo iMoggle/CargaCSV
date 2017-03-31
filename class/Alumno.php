@@ -32,10 +32,11 @@ class Alumno
         from alumno
         left join sede on alumno.id_sede = sede.id_sede
         left join tutor on alumno.id_tutor = tutor.id_tutor
-        where clave_alumno =$ref_alumno";
+        where clave_alumno =$ref_alumno;";
 
         $datos = arreglo(query($query));
-        if (count($datos) > 0) {
+
+        if ($datos <> null) {
             $this->id_alumno = $datos[0];
             $this->nombre = $datos[1];
             $this->appaterno = $datos[2];
@@ -48,9 +49,14 @@ class Alumno
 
     public static function load($ref_alumno)
     {
-        try {
-            return new Alumno($ref_alumno);
-        } catch (Exception $e) {
+        if (is_numeric($ref_alumno)) {
+
+            try {
+                return new Alumno($ref_alumno);
+            } catch (Exception $e) {
+                return null;
+            }
+        } else {
             return null;
         }
     }
@@ -75,8 +81,8 @@ class Alumno
         return $nombre;
     }
 
-    public function  getSedeTutor()
+    public function getSedeTutor()
     {
-        $sede_tutor = $this->tutor."|".$this->sede;
+        $sede_tutor = $this->tutor . "|" . $this->sede;
     }
 }

@@ -52,17 +52,13 @@ class Archivo
     {
         $registros = array();
         if (($fichero = fopen($this->ubicacion, "r")) !== FALSE) {
-            // Lee los nombres de los campos
             $nombres_campos = fgetcsv($fichero, 0, ",", "\"", "\"");
             $this->encabezado_registros = $nombres_campos;
             $num_campos = count($nombres_campos);
-            // Lee los registros
             while (($datos = fgetcsv($fichero, 0, ",", "\"", "\"")) !== FALSE) {
-                // Crea un array asociativo con los nombres y valores de los campos
                 for ($icampo = 0; $icampo < $num_campos; $icampo++) {
                     $registro[$icampo] = $datos[$icampo];
                 }
-                // Añade el registro leido al array de registros
                 $registros[] = $registro;
             }
             fclose($fichero);
@@ -83,60 +79,6 @@ class Archivo
     public function getNumRegistros()
     {
         return count($this->registros);
-    }
-
-    private function setTablaResultado()
-    {
-        return $this->analisisSantander();
-    }
-
-    private function limpiarDato($tipo, $valor)
-    {
-        switch ($tipo) {
-            case 1: //limpiarReferencia
-                $valor = str_replace("000000000", '', $valor);
-                $dato_limpio = trim(substr($valor, 0, 11));
-                break;
-            default:
-                $dato_limpio = "0";
-                break;
-        }
-        return $dato_limpio;
-    }
-
-    private function analisisSantander()
-    {
-
-        $registros_analizados = array();
-        foreach ($this->registros as $registro) {
-            $elemento = array_fill(0, 21, '0');
-            $referencia_ori = $registro[8];
-            $referencia_limpia = $this->limpiarDato(1, $registro[8]);
-            $alumno = Alumno::load($referencia_limpia);
-            if ($alumno != null) {
-                $registro[8] = $alumno->matricula;
-                $elemento[9] = $alumno->sede;
-                $elemento[17] = $alumno->getNombreCompleto();
-            }
-            $elemento[0] = $referencia_ori;
-            $elemento[1] = $registro[8];
-            $elemento[2] = $registro[1];
-            $elemento[3] = $registro[0];
-            $elemento[4] = $registro[4];
-            $elemento[5] = "$".$registro[6];
-            $elemento[6] = $registro[3];
-            $elemento[7] = $registro[8];
-            $elemento[8] = $registro[8];
-            $elemento[12] = $registro[7];
-
-            $registros_analizados[] = $elemento;
-        }
-        return $registros_analizados;
-    }
-
-    private function analisisBanamex()
-    {
-
     }
 
     public function getTablaResultado()
@@ -189,6 +131,59 @@ class Archivo
         <?php
     }
 
+    private function setTablaResultado()
+    {
+        return $this->analisisSantander();
+    }
+
+    private function analisisSantander()
+    {
+
+        $registros_analizados = array();
+        foreach ($this->registros as $registro) {
+            $elemento = array_fill(0, 21, '0');
+            $referencia_ori = trim($registro[8]);
+            $referencia_limpia = $this->limpiarDato(1, $registro[8]);
+            $alumno = Alumno::load($referencia_limpia);
+            if ($alumno != null) {
+                $registro[8] = $alumno->matricula;
+                $elemento[9] = $alumno->sede;
+                $elemento[17] = $alumno->getNombreCompleto();
+            }
+            $elemento[0] = $referencia_ori;
+            $elemento[1] = trim($registro[8]);
+            $elemento[2] = trim($registro[1]);
+            $elemento[3] = trim($registro[0]);
+            $elemento[4] = trim($registro[4]);
+            if (trim($registro[5]) == '+') {
+                $elemento[5] = "<span class='label label-success'>+</span> $" . trim($registro[6]);
+            } else {
+                $elemento[5] = "<span class='label label-warning'>-</span> $" . trim($registro[6]);
+            }
+            $elemento[6] = trim($registro[3]);
+            $elemento[7] = trim($registro[8]);
+            $elemento[8] = trim($registro[8]);
+            $elemento[12] = trim($registro[7]);
+
+            $registros_analizados[] = $elemento;
+        }
+        return $registros_analizados;
+    }
+
+    private function limpiarDato($tipo, $valor)
+    {
+        switch ($tipo) {
+            case 1: //limpiarReferencia
+                $valor = str_replace("000000000", '', $valor);
+                $dato_limpio = trim(substr($valor, 0, 11));
+                break;
+            default:
+                $dato_limpio = "0";
+                break;
+        }
+        return $dato_limpio;
+    }
+
     public function checkExiste($ubicacion)
     {
         if (file_exists($ubicacion . "/" . $this->nombre)) {
@@ -196,5 +191,10 @@ class Archivo
         } else {
             return false;
         }
+    }
+
+    private function analisisBanamex()
+    {
+
     }
 }

@@ -12,7 +12,7 @@ require_once "Alumno.php";
 
 class Archivo
 {
-    const tamaño_archivo = 1024;
+    const size_archivo = 1024;
 
     private $nombre;
     private $ubicacion;
@@ -28,7 +28,7 @@ class Archivo
         $this->nombre = $archivo["file"]["name"];
         $this->extension = pathinfo($this->nombre, PATHINFO_EXTENSION);
         $this->tipo = $archivo["file"]["type"];
-        $this->tamano = $archivo["file"]["size"] / $this::tamaño_archivo;
+        $this->tamano = $archivo["file"]["size"] / $this::size_archivo;
         $this->temp = $archivo["file"]["tmp_name"];
         $this->fecha_carga = (new DateTime())->getTimestamp();
         $this->registros = array();
@@ -86,7 +86,7 @@ class Archivo
         $registros = $this->setTablaResultado();
         ?>
         <div id="dv_resultadostable" class="table-responsive" style="display:none">
-            <table class="table table-bordered table-hover">
+            <table id="resultadostable" class="table table-bordered table-hover">
                 <thead class="thead-inverse">
                 <tr>
                     <th>Referencia Original</th>
@@ -110,14 +110,16 @@ class Archivo
                     <th>Monto Colegiatura</th>
                     <th>Saldo</th>
                     <th>Adeudo</th>
+                    <th>Valido</th>
                 </tr>
                 </thead>
                 <tbody>
                 <?php
                 foreach ($registros as &$registro) {
                     ?>
-                    <tr>
-                        <?php foreach ($registro as $campo) {
+                    <tr class="<?php echo (end($registro) == 0) ? "warning" : ""; ?>">
+                        <?php
+                        foreach ($registro as $campo) {
                             echo "<td>$campo</td>";
                         }
                         ?>
@@ -140,15 +142,19 @@ class Archivo
     {
 
         $registros_analizados = array();
+        $num_filas_array = 22;
         foreach ($this->registros as $registro) {
-            $elemento = array_fill(0, 21, '0');
+            $elemento = array_fill(0, $num_filas_array, '0');
             $referencia_ori = trim($registro[8]);
             $referencia_limpia = $this->limpiarDato(1, $registro[8]);
             $alumno = Alumno::load($referencia_limpia);
             if ($alumno != null) {
                 $registro[8] = $alumno->matricula;
-                $elemento[9] = $alumno->sede;
+                $elemento[9] = $alumno->getSedeTutor();
                 $elemento[17] = $alumno->getNombreCompleto();
+                $elemento[18] = "$" . $alumno->getColegiatura();
+                $elemento[20] = "$" . $alumno->saldo;
+                $elemento[$num_filas_array - 1] = 1;
             }
             $elemento[0] = $referencia_ori;
             $elemento[1] = trim($registro[8]);
@@ -163,6 +169,7 @@ class Archivo
             $elemento[6] = trim($registro[3]);
             $elemento[7] = trim($registro[8]);
             $elemento[8] = trim($registro[8]);
+            $elemento[10] = $this->getTipoMetodoPago(trim($registro[4]));
             $elemento[12] = trim($registro[7]);
 
             $registros_analizados[] = $elemento;
@@ -182,6 +189,24 @@ class Archivo
                 break;
         }
         return $dato_limpio;
+    }
+
+    private function getTipoMetodoPago($tipoPago)
+    {
+        $tipoPago = trim($tipoPago);
+        $metodoPago = "";
+        if ($tipoPago == 'DEP EN EFECTIV' || $tipoPago == 'DEP EFECT ATM') {
+            $metodoPago = '01 | EFECTIVO';
+        } else if (strpos($tipoPago, "TRANS") > 0) {
+            $metodoPago = '03 | TRANSFERENCIA';
+        } else if ($tipoPago == 'DEP ELE PAG TC') {
+            $metodoPago = '04 | TARJETAS DE CREDITO';
+        } else if ($tipoPago == 'DEP S B COBRO') {
+            $metodoPago = '02 | CHEQUE';
+        } else {
+            $metodoPago = $tipoPago;
+        }
+        return $metodoPago;
     }
 
     public function checkExiste($ubicacion)

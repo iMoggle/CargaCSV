@@ -42,6 +42,20 @@ class Sede
         }
     }
 
+    public static function load($ref_sede)
+    {
+        if (is_numeric($ref_sede)) {
+
+            try {
+                return new Alumno($ref_sede);
+            } catch (Exception $e) {
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+
     public function __set($propiedad, $valor)
     {
         if (property_exists($this, $propiedad)) {
@@ -49,12 +63,15 @@ class Sede
         }
     }
 
-    public function __get($name)
+    public function __get($propiedad)
     {
-        // TODO: Implement __get() method.
+        if (property_exists($this, $propiedad)) {
+            return $this->$propiedad;
+        }
     }
 
-    public function getSedeCoordinaror()
+    public function getSedeCoordinador
+    ()
     {
         return $this->nombre . " | " . $this->coordinador;
     }

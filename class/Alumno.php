@@ -18,6 +18,9 @@ class Alumno
     private $nombre;
     private $appaterno;
     private $apmaterno;
+    private $saldo;
+
+    private $oferta_educativa;
     private $generacion;
     private $refencia;
 
@@ -27,10 +30,17 @@ class Alumno
 
     public function __construct($ref_alumno)
     {
-        $query = "select id_alumno, upper(alumno.nombre) as nombre, upper(ap_pat) as ap_pat,upper(ap_mat) as ap_mat,clave_alumno,
+        $query = "select id_alumno,
+        upper(alumno.nombre) as nombre,
+        upper(ap_pat) as ap_pat,
+        upper(ap_mat) as ap_mat,
+        clave_alumno,
+        oferta_educativa_id_oferta_educativa,
         upper(ifnull(sede.nombre,' ')) as nombre_sede,
-        upper(ifnull(concat(tutor.nombre,' ',tutor.apellido_paterno,' ',tutor.apellido_materno),' ')) as nombre_tutor
+        upper(ifnull(concat(tutor.nombre,' ',tutor.apellido_paterno,' ',tutor.apellido_materno),' ')) as nombre_tutor,
+        ifnull(adeudos.saldo_deudor,0) as adeudo
         from alumno
+        left join adeudos on alumno.clave_alumno = adeudos.matricula
         left join sede on alumno.id_sede = sede.id_sede
         left join tutor on alumno.id_tutor = tutor.id_tutor
         where clave_alumno =$ref_alumno;";
@@ -43,8 +53,10 @@ class Alumno
             $this->appaterno = $datos[2];
             $this->apmaterno = $datos[3];
             $this->matricula = $datos[4];
-            $this->sede = $datos[5];
-            $this->tutor = $datos[6];
+            $this->oferta_educativa = $datos[5];
+            $this->sede = $datos[6];
+            $this->tutor = $datos[7];
+            $this->saldo = $datos[8];
         }
     }
 
@@ -84,6 +96,22 @@ class Alumno
 
     public function getSedeTutor()
     {
-        $sede_tutor = $this->tutor . "|" . $this->sede;
+        return $this->tutor . " | " . $this->sede;
+    }
+
+    public function getColegiatura()
+    {
+        $query = 'SELECT colegiaturas.colegiatura_inscripcion, oferta_educativa.nombre
+        FROM alumno
+        LEFT JOIN colegiaturas ON alumno.oferta_educativa_id_oferta_educativa = colegiaturas.id_oferta AND colegiaturas.grado = 1
+        LEFT JOIN oferta_educativa ON alumno.oferta_educativa_id_oferta_educativa = oferta_educativa.id_oferta_educativa AND oferta_educativa.estatus = \'activa\'
+        WHERE alumno.id_alumno = ' . $this->id_alumno;
+
+        $datos = arreglo(query($query));
+
+        if ($datos <> null) {
+            return $datos[0];
+        } else
+            return 0;
     }
 }

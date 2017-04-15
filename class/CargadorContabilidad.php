@@ -6,9 +6,15 @@
  * Date: 16/03/2017
  * Time: 04:44 PM
  */
+
+include "Archivo.php";
+
+const nombre_carpeta_carga = "uploads";
+
 class CargadorContabilidad
 {
     private $mensaje;
+    private $archivo;
 
     public function __get($propiedad)
     {
@@ -38,38 +44,33 @@ class CargadorContabilidad
 
     private function cargarCsv()
     {
-
+        $this->archivo->getCsv();
     }
 
     private function cargarXls()
     {
-
     }
 
     private function cargarArchivo($archivo)
     {
-        $_str_cadena = "";
-        //if there was an error uploading the file
+        //Si hay un error cargando el archivo
         if ($archivo["file"]["error"] > 0) {
             $this->generarMensaje(array(-1, $_FILES["file"]["error"]));
             return false;
         } else {
-            //Print file details
-            $_str_cadena = "Upload: " . $archivo["file"]["name"] . "<br />";
-            $_str_cadena .= "Type: " . $archivo["file"]["type"] . "<br />";
-            $_str_cadena .= "Size: " . ($archivo["file"]["size"] / 1024) . " Kb<br />";
-            $_str_cadena .= "Temp file: " . $archivo["file"]["tmp_name"] . "<br />";
-
-            //if file already exists
-            if (file_exists("upload/" . $archivo["file"]["name"])) {
-                $this->generarMensaje(1);
+            $this->archivo = new Archivo($archivo);
+            //Checa si el archivo existe
+            if ($this->archivo->checkExiste(nombre_carpeta_carga)) {
+                $this->generarMensaje(array(1, null));
                 return false;
             } else {
-                //Store file in directory "upload" with the name of "uploaded_file.txt"
-                $storagename = $_FILES["file"]["name"];
-                move_uploaded_file($archivo["file"]["tmp_name"], "uploads/" . $storagename);
-                $_str_cadena .= "Stored in: " . "uploads/" . $_FILES["file"]["name"] . "<br />";
-                $this->generarMensaje(array(-1, $_str_cadena));
+                //Guardamos el archivo con el nombre original en la carpeta Upload
+                $nombre_almacenamiento = $this->archivo->nombre;
+                $path_almacenamiento = nombre_carpeta_carga . "/" . $nombre_almacenamiento;
+                move_uploaded_file($this->archivo->temp, $path_almacenamiento);
+                $this->archivo->ubicacion = $path_almacenamiento;
+                //Se imprimen los detalles
+                $this->generarMensaje(array(-1, $this->archivo->getPropiedades()));
                 return true;
             }
         }
@@ -78,9 +79,7 @@ class CargadorContabilidad
     public function procesarArchivo($archivo)
     {
         if ($this->cargarArchivo($archivo)) {
-            $extension = strtolower(pathinfo($archivo['file']['name'], PATHINFO_EXTENSION));
-
-            switch ($extension) {
+            switch ($this->archivo->extension) {
                 case "csv":
                     $this->cargarCsv();
                     break;
@@ -94,5 +93,10 @@ class CargadorContabilidad
         } else {
             return false;
         }
+    }
+
+    public function getTablaResultado()
+    {
+        return $this->archivo->getTablaResultado();
     }
 }

@@ -8,7 +8,7 @@ include "class\CargadorContabilidad.php";
         $cargador = new CargadorContabilidad();
         $cargador->procesarArchivo($_FILES);
         echo $cargador->mensaje;
+        echo $cargador->getTablaResultado();
     } else {
         echo "No file selected <br />";
     }
-?>

@@ -23,11 +23,14 @@
         </div>
         <div class="form-group">
             <div class="row">
-                <div class="col-md-2">
+                <div class="col-md-12"><span>Selecciona el archivo de movimientos (Banamex / Santander)</span></div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
                     <label class="btn btn-default" for="in_archivo_selector">
                         <input id="in_archivo_selector" name="file" type="file" style="display:none;"
                                onchange="$('#in_archivo_info').val($(this).val()).show();">
-                        Selecciona un archivo
+                        Movimientos:
                     </label>
                 </div>
                 <div class="col-md-10">
@@ -37,6 +40,32 @@
                 </div>
             </div>
         </div>
+
+        <div class="row">
+            <div class="col-md-12"><span>Selecciona el archivo del Centro de Pagos (Santander)</span></div>
+        </div>
+
+        <div class="form-group">
+            <div class="row">
+                <div class="col-md-2">
+                    <label class="btn btn-default" for="in_archivo_selector2">
+                        <input id="in_archivo_selector2" name="file2" type="file" style="display:none;"
+                               onchange="$('#in_archivo_info2').val($(this).val()).show();">
+                        Centro de Pagos:
+                    </label>
+                </div>
+                <div class="col-md-10">
+                    <label class="sr-only" for="in_archivo_info2">Ruta:</label>
+                    <input id="in_archivo_info2" name="path" class="form-control" type="text" style="display: none;"
+                           readonly="readonly">
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12"><span>Selecciona el archivo de Cargos Automaticos (Santander)</span></div>
+        </div>
+
         <div class="form-group">
             <button name="submit" class="btn btn-primary" type="submit">Subir informacion</button>
         </div>

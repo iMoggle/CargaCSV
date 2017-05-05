@@ -9,6 +9,7 @@
  */
 
 require_once "Alumno.php";
+require_once "PHPExcel.php";
 
 class Archivo
 {
@@ -22,6 +23,7 @@ class Archivo
     private $fecha_carga;
     private $registros;
     private $encabezado_registros;
+    private $tamano;
 
     public function __construct($archivo)
     {
@@ -66,9 +68,29 @@ class Archivo
         }
     }
 
-    public function getXls()
+    public function getXls($fila_inicial = 4)
     {
+        $registros = array();
+        echo $this->ubicacion . "<br>";
+        try {
+            $inputFileType = PHPExcel_IOFactory::identify($this->ubicacion);
+            $objReader = PHPExcel_IOFactory::createReader($inputFileType);
+            $objPHPExcel = $objReader->load($this->ubicacion);
+        } catch (Exception $e) {
+            die('Error loading file "' . pathinfo($this->ubicacion, PATHINFO_BASENAME) . '": ' .
+                $e->getMessage());
+        }
 
+        $sheet = $objPHPExcel->getSheet(0);
+        $highestRow = $sheet->getHighestRow();
+        $highestColumn = $sheet->getHighestColumn();
+
+        for ($row = $fila_inicial; $row <= $highestRow; $row++) {
+            $rowData = $sheet->rangeToArray('A' . $row . ':' . $highestColumn . $row,
+                null, true, false);
+            $registros [] = $rowData;
+        }
+        $this->registros = $registros;
     }
 
     public function getPropiedades()
@@ -144,35 +166,33 @@ class Archivo
         $registros_analizados = array();
         $num_filas_array = 22;
         foreach ($this->registros as $registro) {
-            $elemento = array_fill(0, $num_filas_array, '0');
-            $referencia_ori = trim($registro[8]);
-            $referencia_limpia = $this->limpiarDato(1, $registro[8]);
-            $alumno = Alumno::load($referencia_limpia);
-            if ($alumno != null) {
-                $registro[8] = $alumno->matricula;
-                $elemento[9] = $alumno->getSedeTutor();
-                $elemento[17] = $alumno->getNombreCompleto();
-                $elemento[18] = "$" . $alumno->getColegiatura();
-                $elemento[20] = "$" . $alumno->saldo;
-                $elemento[$num_filas_array - 1] = 1;
-            }
-            $elemento[0] = $referencia_ori;
-            $elemento[1] = trim($registro[8]);
-            $elemento[2] = trim($registro[1]);
-            $elemento[3] = trim($registro[0]);
-            $elemento[4] = trim($registro[4]);
-            if (trim($registro[5]) == '+') {
+            if (trim($registro[5])   == '+') {
+                $elemento = array_fill(0, $num_filas_array, '0');
+                $referencia_ori = trim($registro[8]);
+                $referencia_limpia = $this->limpiarDato(1, $registro[8]);
+                $alumno = Alumno::load($referencia_limpia);
+                if ($alumno != null) {
+                    $registro[8] = $alumno->matricula;
+                    $elemento[9] = $alumno->getSedeTutor();
+                    $elemento[17] = $alumno->getNombreCompleto();
+                    $elemento[18] = "$" . $alumno->getColegiatura();
+                    $elemento[20] = "$" . $alumno->saldo;
+                    $elemento[$num_filas_array - 1] = 1;
+                }
+                $elemento[0] = $referencia_ori;
+                $elemento[1] = trim($registro[8]);
+                $elemento[2] = trim($registro[1]);
+                $elemento[3] = trim($registro[0]);
+                $elemento[4] = trim($registro[4]);
                 $elemento[5] = "<span class='label label-success'>+</span> $" . trim($registro[6]);
-            } else {
-                $elemento[5] = "<span class='label label-warning'>-</span> $" . trim($registro[6]);
-            }
-            $elemento[6] = trim($registro[3]);
-            $elemento[7] = trim($registro[8]);
-            $elemento[8] = trim($registro[8]);
-            $elemento[10] = $this->getTipoMetodoPago(trim($registro[4]));
-            $elemento[12] = trim($registro[7]);
+                $elemento[6] = trim($registro[3]);
+                $elemento[7] = trim($registro[8]);
+                $elemento[8] = trim($registro[8]);
+                $elemento[10] = $this->getTipoMetodoPago(trim($registro[4]));
+                $elemento[12] = trim($registro[7]);
 
-            $registros_analizados[] = $elemento;
+                $registros_analizados[] = $elemento;
+            }
         }
         return $registros_analizados;
     }

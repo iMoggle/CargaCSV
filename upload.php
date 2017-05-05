@@ -14,9 +14,14 @@ include "class\CargadorContabilidad.php";
 if (isset($_FILES["file"])) {
 
     $cargador = new CargadorContabilidad();
-    $cargador->procesarArchivo($_FILES);
-    echo $cargador->mensaje;
-    echo $cargador->getTablaResultado();
+    if ($cargador->procesarArchivo($_FILES)) {
+        echo $cargador->mensaje;
+        echo $cargador->getTablaResultado();
+    }
+    else
+    {
+        echo $cargador->mensaje;
+    }
 } else {
-    echo "No file selected <br />";
+    echo "No selecciono ningún documento.<br />";
 }

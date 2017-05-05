@@ -166,7 +166,7 @@ class Archivo
         $registros_analizados = array();
         $num_filas_array = 22;
         foreach ($this->registros as $registro) {
-            if (trim($registro[5])   == '+') {
+            if (trim($registro[5]) == '+') {
                 $elemento = array_fill(0, $num_filas_array, '0');
                 $referencia_ori = trim($registro[8]);
                 $referencia_limpia = $this->limpiarDato(1, $registro[8]);

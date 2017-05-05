@@ -17,9 +17,7 @@ if (isset($_FILES["file"])) {
     if ($cargador->procesarArchivo($_FILES)) {
         echo $cargador->mensaje;
         echo $cargador->getTablaResultado();
-    }
-    else
-    {
+    } else {
         echo $cargador->mensaje;
     }
 } else {
